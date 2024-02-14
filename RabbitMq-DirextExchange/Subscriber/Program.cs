@@ -12,18 +12,20 @@ var channel = connection.CreateModel();
 
 
 
-channel.BasicQos(0,1,false);
-var subcriber = new EventingBasicConsumer(channel);
+channel.BasicQos(0, 1, false);
+var subscriber = new EventingBasicConsumer(channel);
 
-channel.BasicConsume("first-messages",false,subcriber);
+var queueName = "direct-queue-Critical";
+channel.BasicConsume(queueName, false, subscriber);
+Console.WriteLine("listening to logs...");
 
-subcriber.Received += (object sender, BasicDeliverEventArgs e) =>
+subscriber.Received += (object sender, BasicDeliverEventArgs e) =>
 {
     var message = Encoding.UTF8.GetString(e.Body.ToArray());
 
     Thread.Sleep(2000);
     Console.WriteLine($"Received message: {message}");
-
+    File.AppendAllText("log-Critical.txt", message + "\n");
     channel.BasicAck(e.DeliveryTag, false);
 
 

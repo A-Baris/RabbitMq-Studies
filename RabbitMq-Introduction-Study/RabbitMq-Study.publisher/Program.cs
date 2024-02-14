@@ -9,7 +9,8 @@ using var connection = connectionFactory.CreateConnection();
 
 var channel = connection.CreateModel();
 
-channel.QueueDeclare("first-messages", true, false, false);
+channel.ExchangeDeclare("logs-fanout", durable: true, type: ExchangeType.Fanout);
+
 
 Enumerable.Range(1, 50).ToList().ForEach(x =>
 {
@@ -18,7 +19,7 @@ Enumerable.Range(1, 50).ToList().ForEach(x =>
 
     var messageBody = Encoding.UTF8.GetBytes(message);
 
-    channel.BasicPublish(string.Empty, "first-messages", null, messageBody);
+    channel.BasicPublish("logs-fanout","", null, messageBody);
     Console.WriteLine($"Message is sent :{message} ");
 });
 
